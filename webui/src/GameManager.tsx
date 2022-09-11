@@ -1,50 +1,72 @@
-import { useRef, useState } from "react";
-import { BUTTONS_COUNT } from "./constants";
+import { useEffect, useRef, useState } from "react";
+import { GAME_DURATION_PRESSES } from "./constants";
+import { computeGameScore } from "./lib/lib";
 import { ReflexBoard } from "./lib/ReflexBoard";
-import { ReflexGame } from "./lib/ReflexGame";
-import { useRerender } from "./lib/useRerender";
+import { GameState } from "./lib/types";
+import { RegisterHighScore } from "./RegisterHighScore";
+
+const testscore = Math.random() * 100000;
 
 export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
-  const rerender = useRerender();
-  const reflexGameRef = useRef<ReflexGame | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
 
-  const handleStartGame = () => {
-    if (reflexGameRef.current) {
-      reflexGameRef.current.handleGameFinised();
-    }
+  useEffect(() => {
+    const listener = (state: GameState) => {
+      setGameState(state);
+    };
+    reflexBoard.on("gameState", listener);
+    return () => {
+      reflexBoard.off("gameState", listener);
+    };
+  });
 
-    reflexGameRef.current = new ReflexGame(reflexBoard);
-    reflexGameRef.current.onChange = () => rerender();
-    reflexGameRef.current.startGame();
-  };
-
-  const handleStopGame = () => {
-    reflexGameRef.current?.handleGameFinised();
-  };
+  // return (
+  //   <RegisterHighScore
+  //     gameState={{
+  //       delaySum: testscore,
+  //       missed: 5,
+  //       pressed: 100,
+  //       state: "FINISHED",
+  //     }}
+  //   />
+  // );
 
   if (!reflexBoard.websocket) {
     return <div>Waiting for connection...</div>;
   }
 
+  if (!gameState) {
+    return <p>Waiting for state...</p>;
+  }
+
+  if (
+    gameState.state === "FINISHED" ||
+    (gameState.state === "IDLE" && gameState.pressed !== 0)
+  ) {
+    return (
+      <div>
+        <RegisterHighScore gameState={gameState} />
+      </div>
+    );
+  }
+
+  if (gameState.state === "WAITING_FOR_FIRST_PRESS") {
+    return (
+      <div>
+        <p>LET'S GO!</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {!reflexGameRef.current || reflexGameRef.current.state !== "FINISHED"}
-      <button
-        onClick={handleStartGame}
-        disabled={reflexGameRef.current?.state === "RUNNING"}
-      >
-        Start Game
-      </button>
-      <button
-        onClick={handleStopGame}
-        disabled={
-          !reflexGameRef.current || reflexGameRef.current.state !== "RUNNING"
-        }
-      >
-        Stop game
-      </button>
-      <p>Step: {reflexGameRef.current?.stepIdx}</p>
-      <p>Score: {reflexGameRef.current?.getScore()}</p>
+      <p>State: {gameState.state}</p>
+      <p>
+        Pressed count: {gameState.pressed} / {GAME_DURATION_PRESSES}
+      </p>
+      <p>Missed count: {gameState.missed}</p>
+      <p>Sum delay: {gameState.delaySum}</p>
+      <p>Score: {(computeGameScore(gameState) / 1000).toFixed(2)}s</p>
     </div>
   );
 };

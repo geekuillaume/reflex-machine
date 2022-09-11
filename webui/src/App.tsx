@@ -6,6 +6,7 @@ import { BUTTONS_COUNT } from "./constants";
 import { GameManager } from "./GameManager";
 import { ReflexBoard } from "./lib/ReflexBoard";
 import { useRerender } from "./lib/useRerender";
+import { ScoreBoard } from "./ScoreBoard";
 
 const reflexBoard = new ReflexBoard();
 
@@ -20,10 +21,11 @@ function App() {
 
   return (
     <div className="App">
-      <h1>ReflexBoard</h1>
+      <h1>Reflex Machine</h1>
       <div className="card">
         <ConnectionManager reflexBoard={reflexBoard} />
         <GameManager reflexBoard={reflexBoard} />
+        <ScoreBoard />
       </div>
     </div>
   );

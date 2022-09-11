@@ -1,11 +1,10 @@
 import EventEmitter from "eventemitter3";
-import { ReceivedMessage, SentMessage } from "../types";
+import { GameState, ReceivedMessage, SentMessage } from "./types";
 
 export class ReflexBoard extends EventEmitter<{
   connected: () => void;
   disconnected: () => void;
-  pressedButton: (buttonId: number, delay: number) => void;
-  missedButton: (buttonId: number) => void;
+  gameState: (state: GameState) => void;
 }> {
   websocket: WebSocket | null;
   onStateChange: () => any = () => {};
@@ -32,10 +31,8 @@ export class ReflexBoard extends EventEmitter<{
     websocket.addEventListener("message", async (e) => {
       const message = JSON.parse(e.data) as ReceivedMessage;
       console.log("Received:", message);
-      if (message.type === "pressed") {
-        this.emit("pressedButton", message.buttonId, message.delay);
-      } else if (message.type === "missed") {
-        this.emit("missedButton", message.buttonId);
+      if (message.type === "gameState") {
+        this.emit("gameState", message);
       }
     });
   }
@@ -48,27 +45,20 @@ export class ReflexBoard extends EventEmitter<{
     this.onStateChange();
   }
 
-  lightUpButtons(buttonsId: number[]) {
+  sendMessage(message: SentMessage) {
     if (!this.websocket) {
       return;
     }
-    const message: SentMessage = {
-      type: "lightsOn",
-      buttonsId,
-    };
-
-    this.websocket.send(JSON.stringify(message));
+    try {
+      this.websocket.send(JSON.stringify(message));
+    } catch (e) {
+      console.error("Error while sending message", e);
+    }
   }
 
-  lightOffButtons(buttonsId: number[]) {
-    if (!this.websocket) {
-      return;
-    }
-    const message: SentMessage = {
-      type: "lightsOff",
-      buttonsId,
-    };
-
-    this.websocket.send(JSON.stringify(message));
+  stopGame() {
+    this.sendMessage({
+      type: "stopGame",
+    });
   }
 }

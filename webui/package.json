@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.0.0-rc.10",
     "eventemitter3": "^4.0.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

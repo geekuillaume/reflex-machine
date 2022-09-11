@@ -1,3 +1,5 @@
+import { GameState } from "./types";
+
 export const delay = (val: number) => {
   return new Promise((resolve) => setTimeout(resolve, val));
 };
@@ -12,3 +14,6 @@ export const convertBoolsToUint16 = (bools: boolean[]) => {
 
   return bitarray;
 };
+
+export const computeGameScore = (gameState: GameState) =>
+  gameState.delaySum + gameState.missed * 1500;
