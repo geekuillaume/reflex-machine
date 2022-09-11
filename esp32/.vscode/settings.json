@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    ".env": "shellscript",
+    "cmath": "cpp"
+  }
+}
