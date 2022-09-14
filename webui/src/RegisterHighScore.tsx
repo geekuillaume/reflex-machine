@@ -49,7 +49,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       <input
         type="text"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => setName(e.target.value.slice(0, 3))}
         maxLength={3}
       />
       <button onClick={saveScore} disabled={savingState !== "INIT"}>
