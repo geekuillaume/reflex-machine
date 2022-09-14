@@ -4,9 +4,13 @@
 #include <ArduinoJson.h>
 #include "Button2.h"
 #include <arduino-timer.h>
+#include <Preferences.h>
+#include <ArduinoOTA.h>
 
-#define GAME_BUTTONS_ON_IN_PARALLEL 2
-#define GAME_BUTTONS_DURATION_PRESSED 15 // Game stop after 100 presses
+uint GAME_BUTTONS_ON_IN_PARALLEL = 2;
+uint GAME_BUTTONS_DURATION_PRESSED = 100; // Game stop after 100 presses
+
+Preferences preferences;
 
 // Replace with your network credentials
 const char* ssid = "ThisIsNotTheWifiYoureLookingFor";
@@ -43,7 +47,7 @@ typedef enum  {
 GAME_STATE gameState = IDLE;
 unsigned int gameButtonsPressed = 0;
 unsigned int gameButtonsMissed = 0;
-unsigned long buttonPressDelaySum = 0;
+unsigned long gameStartedAt = 0;
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
@@ -82,6 +86,8 @@ void broadcastGameState() {
   StaticJsonDocument<256> wsMessage;
   String serializedWsMesssage;
 
+  unsigned long startedMsAgo = millis() - gameStartedAt;
+
   wsMessage["type"] = "gameState";
   wsMessage["state"] = gameState == IDLE ? "IDLE"
     : gameState == WAITING_FOR_FIRST_PRESS ? "WAITING_FOR_FIRST_PRESS"
@@ -90,7 +96,7 @@ void broadcastGameState() {
     : "UNKNOWN";
   wsMessage["missed"] = gameButtonsMissed;
   wsMessage["pressed"] = gameButtonsPressed;
-  wsMessage["delaySum"] = buttonPressDelaySum;
+  wsMessage["startedMsAgo"] = startedMsAgo;
 
   serializeJson(wsMessage, serializedWsMesssage);
   Serial.println(serializedWsMesssage);
@@ -121,6 +127,18 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     }
 
     if (strcmp("stopGame", parsedMessage["type"]) == 0) {
+      stopGame();
+    }
+
+    if (strcmp("preferences", parsedMessage["type"]) == 0) {
+      if (parsedMessage.containsKey("parallel")) {
+        preferences.putUInt("parallel", parsedMessage["parallel"]);
+        GAME_BUTTONS_ON_IN_PARALLEL = parsedMessage["parallel"];
+      }
+      if (parsedMessage.containsKey("duration")) {
+        preferences.putUInt("duration", parsedMessage["duration"]);
+        GAME_BUTTONS_DURATION_PRESSED = parsedMessage["duration"];
+      }
       stopGame();
     }
   }
@@ -196,15 +214,13 @@ void onButtonPressed(Button2& btn) {
     turnOnAllButtons(); // reset ledTurnOnAt for every button to reset delay of other buttons
     gameState = RUNNING;
     gameButtonsPressed = 0;
-    buttonPressDelaySum = 0;
+    gameStartedAt = millis();
   }
 
   if (buttons[btn.getID()].ledTurnedOnAt == 0) {
     gameButtonsMissed++;
   } else {
     gameButtonsPressed++;
-    buttonPressDelaySum += millis() - buttons[btn.getID()].ledTurnedOnAt;
-
     turnOffButton(btn.getID());
   }
 
@@ -240,6 +256,11 @@ void setup(){
   Serial.begin(115200);
 
   Serial.println("Starting");
+
+  preferences.begin("reflex-machine", false);
+  GAME_BUTTONS_DURATION_PRESSED = preferences.getUInt("duration", 100);
+  GAME_BUTTONS_ON_IN_PARALLEL = preferences.getUInt("parallel", 2);
+
   for (int i = 0; i < BUTTONS_COUNT; i++) {
     buttons[i].button.begin(buttons[i].buttonPin);
     buttons[i].button.setID(i);
@@ -257,6 +278,34 @@ void setup(){
     delay(1000);
     Serial.println("Connecting to WiFi..");
   }
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
 
   // Print ESP Local IP Address
   Serial.println(WiFi.localIP());
@@ -281,4 +330,5 @@ void loop() {
     buttons[i].button.loop();
   }
   ws.cleanupClients();
+  ArduinoOTA.handle();
 }
