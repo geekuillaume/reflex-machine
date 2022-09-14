@@ -17,15 +17,15 @@ export const ConnectionManager = ({
   const handleDisconnedClick = () => {
     reflexBoard.disconnect();
   };
-
+  let buttonBorder = !reflexBoard.websocket ? "#35d0ba" : "#d92027";
   return (
-    <div>
-      <p>{!!reflexBoard.websocket ? "Connected" : "Disconnected"}</p>
-      <button onClick={handleConnectClick} disabled={!!reflexBoard.websocket}>
-        Connect
-      </button>
-      <button onClick={handleDisconnedClick} disabled={!reflexBoard.websocket}>
-        Disconnected
+    <div className="connexionManager">
+      <button
+        onClick={handleConnectClick}
+        className="connectButton"
+        style={{ border: buttonBorder + " solid 2px" }}
+      >
+        {!reflexBoard.websocket ? "Connect" : "Disconnect"}
       </button>
     </div>
   );

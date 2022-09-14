@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
+import "./reset.css";
 import "./App.css";
 import { ConnectionManager } from "./ConnectionManager";
 import { BUTTONS_COUNT } from "./constants";
@@ -21,11 +22,15 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Reflex Machine</h1>
+      <div className="titleContainer">
+        <h1 className="title">
+          Reflex <br /> Machine
+        </h1>
+      </div>
       <div className="card">
-        <ConnectionManager reflexBoard={reflexBoard} />
         <GameManager reflexBoard={reflexBoard} />
         <ScoreBoard />
+        <ConnectionManager reflexBoard={reflexBoard} />
       </div>
     </div>
   );

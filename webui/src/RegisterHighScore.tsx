@@ -43,8 +43,9 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
 
   return (
     <div>
+      {rank == 1 && <p>New High Score !</p>}
       <p>Score: {(score / 1000).toFixed(2)}</p>
-      <p>Rank {rank === -1 ? "..." : rank}</p>
+      {rank !== 1 && <p>Rank {rank === -1 ? "..." : rank}</p>}
       <p>ENTER YOUR NAME:</p>
       <input
         type="text"

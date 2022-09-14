@@ -8,7 +8,13 @@ import { RegisterHighScore } from "./RegisterHighScore";
 const testscore = Math.random() * 100000;
 
 export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>({
+    delaySum: 35000,
+    missed: 5,
+    pressed: 30,
+    state: "IDLE",
+  });
+  let idleMessage = "Press any button to start...";
 
   useEffect(() => {
     const listener = (state: GameState) => {
@@ -32,9 +38,9 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
   //   />
   // );
 
-  if (!reflexBoard.websocket) {
-    return <div>Waiting for connection...</div>;
-  }
+  // if (!reflexBoard.websocket) {
+  //   return <div>Waiting for connection...</div>;
+  // }
 
   if (!gameState) {
     return <p>Waiting for state...</p>;
@@ -51,16 +57,30 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
     );
   }
 
+  if (gameState.state === "IDLE") {
+    return (
+      <div className="waivy">
+        {idleMessage.split("").map((letter, index) => {
+          return (
+            <span style={{ "--i": index }}>
+              {letter == " " ? "\u00A0" : letter}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (gameState.state === "WAITING_FOR_FIRST_PRESS") {
     return (
       <div>
-        <p>LET'S GO!</p>
+        <p>Let's go !</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="gameManager">
       <p>State: {gameState.state}</p>
       <p>
         Pressed count: {gameState.pressed} / {GAME_DURATION_PRESSES}
