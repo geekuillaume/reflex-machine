@@ -20,10 +20,11 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
     };
   });
 
+  // Used to test display without actual game
   // return (
   //   <RegisterHighScore
   //     gameState={{
-  //       delaySum: testscore,
+  //       startedMsAgo: testscore,
   //       missed: 5,
   //       pressed: 100,
   //       state: "FINISHED",
@@ -65,7 +66,7 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
         Pressed count: {gameState.pressed} / {GAME_DURATION_PRESSES}
       </p>
       <p>Missed count: {gameState.missed}</p>
-      <p>Sum delay: {gameState.delaySum}</p>
+      <p>Started ms ago: {gameState.startedMsAgo}</p>
       <p>Score: {(computeGameScore(gameState) / 1000).toFixed(2)}s</p>
     </div>
   );

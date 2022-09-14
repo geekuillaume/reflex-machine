@@ -16,4 +16,4 @@ export const convertBoolsToUint16 = (bools: boolean[]) => {
 };
 
 export const computeGameScore = (gameState: GameState) =>
-  gameState.delaySum + gameState.missed * 1500;
+  gameState.startedMsAgo + gameState.missed * 1500;

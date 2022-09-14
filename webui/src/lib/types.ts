@@ -2,7 +2,7 @@ export interface GameState {
   state: "IDLE" | "WAITING_FOR_FIRST_PRESS" | "RUNNING" | "FINISHED";
   missed: number;
   pressed: number;
-  delaySum: number;
+  startedMsAgo: number;
 }
 
 export interface GameStateMessage extends GameState {
@@ -15,4 +15,10 @@ export interface StopGameMessage {
   type: "stopGame";
 }
 
-export type SentMessage = StopGameMessage;
+export interface PreferencesMessage {
+  type: "preferences";
+  parallel?: number;
+  duration?: number;
+}
+
+export type SentMessage = StopGameMessage | PreferencesMessage;

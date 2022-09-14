@@ -23,17 +23,12 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
 
   const saveScore = async () => {
     setSavingState("LOADING");
-    const { data } = await supabase
-      .from("scores")
-      .insert([
-        {
-          score,
-          name,
-        },
-      ])
-      .select("*");
-    console.log(data);
-    supabase.from("scores");
+    await supabase.from("scores").insert([
+      {
+        score,
+        name,
+      },
+    ]);
     setSavingState("DONE");
   };
 
@@ -55,6 +50,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        maxLength={3}
       />
       <button onClick={saveScore} disabled={savingState !== "INIT"}>
         SAVE SCORE
