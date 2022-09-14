@@ -140,3 +140,13 @@ html,
   display: flex;
   width: 100%;
 }
+.registerScoreButton {
+  font-family: "Barlow Semi Condensed", sans-serif;
+  font-size: 15px;
+  font-weight: bold;
+  color: #f3f3f3;
+  background-color: #292929;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 5px;
+}
