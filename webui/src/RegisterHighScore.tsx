@@ -43,15 +43,20 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
 
   return (
     <div>
-      {rank == 1 && <p>New High Score !</p>}
-      <p>Score: {(score / 1000).toFixed(2)}</p>
+      {rank == 1 && (
+        <p className="newHighScore">
+          New High Score : {(score / 1000).toFixed(2)}s !
+        </p>
+      )}
+      {rank !== 1 && <p>Score: {(score / 1000).toFixed(2)}s</p>}
       {rank !== 1 && <p>Rank: {rank === -1 ? "..." : rank}</p>}
       <p>Enter your name :</p>
       <input
         type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value.slice(0, 3))}
+        value={name.toUpperCase()}
+        onChange={(e) => setName(e.target.value.slice(0, 3).toUpperCase())}
         maxLength={3}
+        autoFocus
       />
       <br />
       <button

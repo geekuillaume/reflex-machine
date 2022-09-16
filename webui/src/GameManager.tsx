@@ -9,9 +9,9 @@ const testscore = Math.random() * 100000;
 
 export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
   const [gameState, setGameState] = useState<GameState | null>({
-    delaySum: 35000,
-    missed: 5,
-    pressed: 30,
+    startedMsAgo: 34670,
+    missed: 2,
+    pressed: 90,
     state: "IDLE",
   });
   let idleMessage = "Press any button to start...";
@@ -74,19 +74,32 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
   if (gameState.state === "WAITING_FOR_FIRST_PRESS") {
     return (
       <div>
-        <p>Let's go !</p>
+        <p className="LetsGo">Let's go !</p>
       </div>
     );
+  }
+  let missColor = "#f3f3f3";
+  if (gameState.missed > 0) {
+    missColor = "#ffcd3c";
+  }
+  if (gameState.missed > 3) {
+    missColor = "#ff9234";
+  }
+  if (gameState.missed > 6) {
+    missColor = "#d92027";
   }
 
   return (
     <div className="gameManager">
-      <p>State: {gameState.state}</p>
+      <p>Game started {(gameState.startedMsAgo / 1000).toFixed(2)}s ago </p>
+
       <p>
-        Pressed count: {gameState.pressed} / {GAME_DURATION_PRESSES}
+        Lights pressed: {gameState.pressed} / {GAME_DURATION_PRESSES}
       </p>
-      <p>Missed count: {gameState.missed}</p>
-      <p>Started ms ago: {gameState.startedMsAgo}</p>
+      <p>
+        Miss count :{" "}
+        <span style={{ color: missColor }}>{gameState.missed}</span>
+      </p>
       <p>Score: {(computeGameScore(gameState) / 1000).toFixed(2)}s</p>
     </div>
   );

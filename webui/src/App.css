@@ -118,7 +118,7 @@ html,
 .waivy span {
   position: relative;
   display: inline-block;
-  color: #fff;
+  color: #f3f3f3;
   animation: waivy 4s infinite;
   animation-delay: calc(0.1s * var(--i));
 }
@@ -140,6 +140,7 @@ html,
   display: flex;
   width: 100%;
 }
+
 .registerScoreButton {
   font-family: "Barlow Semi Condensed", sans-serif;
   font-size: 15px;
@@ -149,4 +150,40 @@ html,
   border-radius: 8px;
   cursor: pointer;
   padding: 5px;
+}
+
+.newHighScore {
+  font-size: 40px;
+  padding: 5px;
+  animation: rainbow 5s linear;
+  animation-iteration-count: infinite;
+}
+@keyframes rainbow {
+  100%,
+  0% {
+    color: #d92027;
+  }
+  25% {
+    color: #ff9234;
+  }
+  33% {
+    color: #ffcd3c;
+  }
+
+  66% {
+    color: #35d0ba;
+  }
+  75% {
+    color: #ffcd3c;
+  }
+  83% {
+    color: #ff9234;
+  }
+  91% {
+    color: #d92027;
+  }
+}
+
+.LetsGo {
+  font-size: 40px;
 }
