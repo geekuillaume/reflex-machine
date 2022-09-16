@@ -207,8 +207,10 @@ html,
 .tableHSLeft {
   text-align: right;
   padding: 0 10px;
+  width: 50%;
 }
 .tableHSRight {
   text-align: left;
   padding: 0 10px;
+  width: 50%;
 }
