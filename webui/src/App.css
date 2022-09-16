@@ -135,7 +135,7 @@ html,
 }
 
 .connexionManager {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   display: flex;
   width: 100%;
@@ -196,4 +196,19 @@ html,
   color: #f3f3f3;
   font-size: 24px;
   margin: 5px;
+}
+.smallLabel {
+  font-size: 25px;
+  color: #f3f3f3a4;
+}
+.tableHighScore {
+  width: 100%;
+}
+.tableHSLeft {
+  text-align: right;
+  padding: 0 10px;
+}
+.tableHSRight {
+  text-align: left;
+  padding: 0 10px;
 }

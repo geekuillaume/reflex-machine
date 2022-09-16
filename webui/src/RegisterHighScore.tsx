@@ -48,9 +48,28 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
           New High Score : {(score / 1000).toFixed(2)}s !
         </p>
       )}
-      {rank !== 1 && <p>Score: {(score / 1000).toFixed(2)}s</p>}
-      {rank !== 1 && <p>Rank: {rank === -1 ? "..." : rank}</p>}
-      <p>Enter your name :</p>
+      <table className="tableHighScore">
+        <tbody>
+          {rank !== 1 && (
+            <tr>
+              <td className="tableHSLeft">
+                <span className="smallLabel">Your Score </span>{" "}
+              </td>
+              <td className="tableHSRight">{(score / 1000).toFixed(2)}s</td>
+            </tr>
+          )}
+          {rank !== 1 && (
+            <tr>
+              <td className="tableHSLeft">
+                <span className="smallLabel">Your Rank </span>{" "}
+              </td>
+              <td className="tableHSRight">{rank === -1 ? "..." : rank}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      <br />
+      <p className="smallLabel">Enter your name</p>
       <input
         className="nameInput"
         type="text"
