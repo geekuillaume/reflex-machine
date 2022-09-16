@@ -52,6 +52,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       {rank !== 1 && <p>Rank: {rank === -1 ? "..." : rank}</p>}
       <p>Enter your name :</p>
       <input
+        className="nameInput"
         type="text"
         value={name.toUpperCase()}
         onChange={(e) => setName(e.target.value.slice(0, 3).toUpperCase())}

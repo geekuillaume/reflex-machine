@@ -187,3 +187,13 @@ html,
 .LetsGo {
   font-size: 40px;
 }
+.nameInput {
+  background: transparent;
+  border: none;
+  border-bottom: #f3f3f3 dashed 1px;
+  width: 50px;
+  text-align: center;
+  color: #f3f3f3;
+  font-size: 24px;
+  margin: 5px;
+}
