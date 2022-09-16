@@ -9,9 +9,9 @@ const testscore = Math.random() * 100000;
 
 export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
   const [gameState, setGameState] = useState<GameState | null>({
-    startedMsAgo: 34670,
-    missed: 2,
-    pressed: 90,
+    startedMsAgo: 0,
+    missed: 0,
+    pressed: 0,
     state: "IDLE",
   });
   let idleMessage = "Press any button to start...";

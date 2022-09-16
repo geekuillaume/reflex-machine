@@ -56,7 +56,6 @@ html,
 }
 
 .score0 {
-  padding: 0.2rem;
   display: inline-block;
   background: linear-gradient(to right, #3a86ff, #4cc9f0);
   -webkit-background-clip: text;
@@ -64,7 +63,6 @@ html,
 }
 
 .score1 {
-  padding: 0.2rem;
   background: linear-gradient(to right, #ffbe0b, #fb5607);
   display: inline-block;
   -webkit-background-clip: text;
@@ -72,14 +70,12 @@ html,
 }
 
 .score2 {
-  padding: 0.2rem;
   background: linear-gradient(to right, #38a3a5, #80ed99);
   display: inline-block;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .score3 {
-  padding: 0.2rem;
   background: linear-gradient(to right, #ff006e, #8338ec);
   display: inline-block;
   -webkit-background-clip: text;
@@ -87,14 +83,12 @@ html,
 }
 
 .score4 {
-  padding: 0.2rem;
   background: linear-gradient(to right, #8338ec, #3a86ff);
   display: inline-block;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .score5 {
-  padding: 0.2rem;
   background: linear-gradient(to right, #ffff3f, #55a630);
   display: inline-block;
   -webkit-background-clip: text;
@@ -213,4 +207,30 @@ html,
   text-align: left;
   padding: 0 10px;
   width: 50%;
+}
+.scoresBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+.scoresLine {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+.scoresBoxName {
+}
+.scoresBoxMid {
+  flex-grow: 1;
+  border-bottom: #f3f3f3 5px dotted;
+}
+.scoresBoxScore {
+}
+.scoresContainer {
+  display: flex;
+  width: 100%;
+  justify-content: center;
 }

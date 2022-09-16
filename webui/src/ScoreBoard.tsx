@@ -41,14 +41,21 @@ export const ScoreBoard = () => {
   return (
     <div className="scoreBoard">
       <h2 className="scores--title">Hi-Scores</h2>
-      {scores.map((score) => (
-        <div key={score.id}>
-          <span className={`score${getHash(score.name) % 6}`}>
-            {score.name}
-          </span>
-          : {(score.score / 1000).toFixed(2)}s
+      <div className="scoresContainer">
+        <div className="scoresBox">
+          {scores.map((score) => (
+            <p className="scoresLine" key={score.id}>
+              <span className={`score${getHash(score.name) % 6} scoresBoxName`}>
+                {score.name}
+              </span>
+              <div className="scoresBoxMid"></div>
+              <p className="scoresBoxScore">
+                {(score.score / 1000).toFixed(2)}s
+              </p>
+            </p>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
