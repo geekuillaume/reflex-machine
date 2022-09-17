@@ -7,7 +7,7 @@
 #include <Preferences.h>
 #include <ArduinoOTA.h>
 
-uint GAME_BUTTONS_ON_IN_PARALLEL = 2;
+uint GAME_BUTTONS_ON_IN_PARALLEL = 3;
 uint GAME_BUTTONS_DURATION_PRESSED = 100; // Game stop after 100 presses
 
 Preferences preferences;
@@ -48,6 +48,7 @@ GAME_STATE gameState = IDLE;
 unsigned int gameButtonsPressed = 0;
 unsigned int gameButtonsMissed = 0;
 unsigned long gameStartedAt = 0;
+unsigned long gameLastActionTime = 0;
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
@@ -86,7 +87,7 @@ void broadcastGameState() {
   StaticJsonDocument<256> wsMessage;
   String serializedWsMesssage;
 
-  unsigned long startedMsAgo = millis() - gameStartedAt;
+  unsigned long startedMsAgo = gameLastActionTime - gameStartedAt;
 
   wsMessage["type"] = "gameState";
   wsMessage["state"] = gameState == IDLE ? "IDLE"
@@ -223,6 +224,7 @@ void onButtonPressed(Button2& btn) {
     gameButtonsPressed++;
     turnOffButton(btn.getID());
   }
+  gameLastActionTime = millis();
 
   int onButtonsCount = countOnButtons();
 
