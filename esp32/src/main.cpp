@@ -215,6 +215,7 @@ void onButtonPressed(Button2& btn) {
     turnOnAllButtons(); // reset ledTurnOnAt for every button to reset delay of other buttons
     gameState = RUNNING;
     gameButtonsPressed = 0;
+    gameButtonsMissed = 0;
     gameStartedAt = millis();
   }
 
