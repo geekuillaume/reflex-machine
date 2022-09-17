@@ -38,6 +38,7 @@ export const ScoreBoard = () => {
       .on("postgres_changes", { event: "*", schema: "*" }, () => updateScores())
       .subscribe();
   }, []);
+
   return (
     <div className="scoreBoard">
       <h2 className="scores--title">Hi-Scores</h2>

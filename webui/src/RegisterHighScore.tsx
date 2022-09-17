@@ -11,6 +11,17 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
   );
   const score = Math.floor(computeGameScore(gameState));
 
+  let missColor = "#f3f3f3";
+  if (gameState.missed > 0) {
+    missColor = "#ffcd3c";
+  }
+  if (gameState.missed > 3) {
+    missColor = "#ff9234";
+  }
+  if (gameState.missed > 6) {
+    missColor = "#d92027";
+  }
+
   useEffect(() => {
     supabase
       .from("scores")
@@ -40,7 +51,19 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       </div>
     );
   }
+  let keyHandler = (e: any) => {
+    if (e.keyCode == 13) {
+      saveScore();
+    }
+  };
 
+  useEffect(() => {
+    document.addEventListener("keydown", keyHandler, false);
+
+    return () => {
+      document.removeEventListener("keydown", keyHandler, false);
+    };
+  });
   return (
     <div>
       {rank == 1 && (
@@ -69,6 +92,11 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
         </tbody>
       </table>
       <br />
+      <p className="smallLabel">
+        You made <span style={{ color: missColor }}>{gameState.missed}</span>{" "}
+        mistakes
+      </p>
+      <br />
       <p className="smallLabel">Enter your name</p>
       <input
         className="nameInput"
@@ -77,6 +105,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
         onChange={(e) => setName(e.target.value.slice(0, 3).toUpperCase())}
         maxLength={3}
         autoFocus
+        onKeyDown={(e) => console.log(e)}
       />
       <br />
       <button
