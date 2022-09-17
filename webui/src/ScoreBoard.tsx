@@ -25,7 +25,7 @@ export const ScoreBoard = () => {
         .order("score", {
           ascending: true,
         })
-        .limit(50);
+        .limit(100);
 
       if (!error) {
         setScores(data);
