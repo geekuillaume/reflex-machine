@@ -8,12 +8,15 @@ import { RegisterHighScore } from "./RegisterHighScore";
 const testscore = Math.random() * 100000;
 
 export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
-  const [gameState, setGameState] = useState<GameState | null>({
-    startedMsAgo: 0,
-    missed: 0,
-    pressed: 0,
-    state: "IDLE",
-  });
+  const [gameState, setGameState] = useState<GameState | null>(
+    null
+    // {
+    //   startedMsAgo: 0,
+    //   missed: 0,
+    //   pressed: 0,
+    //   state: "IDLE",
+    // }
+  );
   let idleMessage = "Press any button to start...";
 
   useEffect(() => {
@@ -38,12 +41,8 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
   //   />
   // );
 
-  // if (!reflexBoard.websocket) {
-  //   return <div>Waiting for connection...</div>;
-  // }
-
   if (!gameState) {
-    return <p>Waiting for state...</p>;
+    return <p>Waiting...</p>;
   }
 
   if (
@@ -62,7 +61,7 @@ export const GameManager = ({ reflexBoard }: { reflexBoard: ReflexBoard }) => {
       <div className="waivy">
         {idleMessage.split("").map((letter, index) => {
           return (
-            <span style={{ "--i": index }}>
+            <span style={{ "--i": index } as any}>
               {letter == " " ? "\u00A0" : letter}
             </span>
           );
