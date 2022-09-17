@@ -44,9 +44,14 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
   };
 
   if (savingState === "DONE") {
+    const ordinals = ["", "st", "nd", "rd"];
+
     return (
       <div>
-        <p>You just got the {rank} place!</p>
+        <p>
+          You just got the {rank}
+          {rank < ordinals.length ? ordinals[rank] : "th"} place!
+        </p>
         <p>Your score was saved!</p>
       </div>
     );
@@ -68,7 +73,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
     <div>
       {rank == 1 && (
         <p className="newHighScore">
-          New High Score : {(score / 1000).toFixed(2)}s !
+          New High Score: {(score / 1000).toFixed(2)}s !
         </p>
       )}
       <table className="tableHighScore">
