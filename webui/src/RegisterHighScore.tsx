@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { computeGameScore } from "./lib/lib";
 import { supabase } from "./lib/supabase";
 import { GameState } from "./lib/types";
@@ -32,7 +32,8 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       });
   }, [score]);
 
-  const saveScore = async () => {
+  const saveScore = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setSavingState("LOADING");
     await supabase.from("scores").insert([
       {
@@ -56,19 +57,7 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       </div>
     );
   }
-  let keyHandler = (e: any) => {
-    if (e.keyCode == 13) {
-      saveScore();
-    }
-  };
 
-  useEffect(() => {
-    document.addEventListener("keydown", keyHandler, false);
-
-    return () => {
-      document.removeEventListener("keydown", keyHandler, false);
-    };
-  });
   return (
     <div>
       {rank == 1 && (
@@ -99,27 +88,29 @@ export const RegisterHighScore = ({ gameState }: { gameState: GameState }) => {
       <br />
       <p className="smallLabel">
         You made <span style={{ color: missColor }}>{gameState.missed}</span>{" "}
-        mistakes
+        mistake{gameState.missed > 1 ? "s" : ""}
       </p>
       <br />
       <p className="smallLabel">Enter your name</p>
-      <input
-        className="nameInput"
-        type="text"
-        value={name.toUpperCase()}
-        onChange={(e) => setName(e.target.value.slice(0, 3).toUpperCase())}
-        maxLength={3}
-        autoFocus
-        onKeyDown={(e) => console.log(e)}
-      />
-      <br />
-      <button
-        className="registerScoreButton"
-        onClick={saveScore}
-        disabled={savingState !== "INIT"}
-      >
-        SAVE SCORE
-      </button>
+      <form onSubmit={saveScore}>
+        <input
+          className="nameInput"
+          type="text"
+          value={name.toUpperCase()}
+          onChange={(e) => setName(e.target.value.slice(0, 3).toUpperCase())}
+          maxLength={3}
+          autoFocus
+          onKeyDown={(e) => console.log(e)}
+        />
+        <br />
+        <button
+          className="registerScoreButton"
+          type="submit"
+          disabled={savingState !== "INIT"}
+        >
+          SAVE SCORE
+        </button>
+      </form>
     </div>
   );
 };
