@@ -15,6 +15,9 @@ export class ReflexBoard extends EventEmitter<{
   }
 
   connect(host: string) {
+    if (this.websocket) {
+      return;
+    }
     const websocket = new WebSocket(`ws://${host}/ws`);
     websocket.addEventListener("open", () => {
       this.websocket = websocket;

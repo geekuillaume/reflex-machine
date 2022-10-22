@@ -5,6 +5,7 @@ import { ReflexBoard } from "./lib/ReflexBoard";
 import { ReceivedMessage } from "./lib/types";
 
 const IP = "192.168.1.122";
+const CONNECT_BY_DEFAULT = true;
 
 export const ConnectionManager = ({
   reflexBoard,
@@ -12,11 +13,19 @@ export const ConnectionManager = ({
   reflexBoard: ReflexBoard;
 }) => {
   const handleConnectClick = () => {
-    reflexBoard.connect(IP);
+    if (reflexBoard.websocket) {
+      reflexBoard.disconnect();
+    } else {
+      reflexBoard.connect(IP);
+    }
   };
-  const handleDisconnedClick = () => {
-    reflexBoard.disconnect();
-  };
+
+  useEffect(() => {
+    if (CONNECT_BY_DEFAULT) {
+      reflexBoard.connect(IP);
+    }
+  }, [reflexBoard]);
+
   let buttonBorder = !reflexBoard.websocket ? "#35d0ba" : "#d92027";
   return (
     <div className="connexionManager">

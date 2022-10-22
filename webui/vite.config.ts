@@ -8,7 +8,15 @@ export default defineConfig({
     react(),
     viteCompression({
       threshold: 0,
-      algorithm: "brotliCompress",
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`,
+      },
+    },
+  },
 });
