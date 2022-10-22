@@ -1,21 +1,13 @@
-
-#include <Preferences.h>
-
-#include "./game.hpp"
-#include "./webserver.hpp"
-#include "./preferences.hpp"
+#include "./main.hpp"
 
 void setup(){
   // Serial port for debugging purposes
   Serial.begin(115200);
-  Serial.println("Starting");
+  debugA("Starting Reflex Machine");
 
   setupPreferences();
   setupWebserver();
   setupGame();
 }
 
-void loop() {
-  loopWebserver();
-  loopGame();
-}
+void loop() {}

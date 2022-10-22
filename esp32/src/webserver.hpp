@@ -2,4 +2,3 @@
 
 void setupWebserver();
 void broadcastGameState();
-void loopWebserver();

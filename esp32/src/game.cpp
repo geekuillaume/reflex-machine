@@ -1,9 +1,6 @@
 #include "Button2.h"
-#include <arduino-timer.h>
 
-#include "./game.hpp"
-#include "./preferences.hpp"
-#include "./webserver.hpp"
+#include "./main.hpp"
 
 typedef struct {
   int buttonPin;
@@ -33,10 +30,6 @@ unsigned long gameStartedAt = 0;
 unsigned long gameLastActionTime = 0;
 
 
-auto beforeIdleTimer = timer_create_default(); // timer to re-start idle state after finished
-auto afterFinishedLightFlashTimer = timer_create_default(); // timer to flash lights after finished
-
-
 void turnOffButton(int buttonIndex) {
   buttons[buttonIndex].ledTurnedOnAt = 0;
   digitalWrite(buttons[buttonIndex].ledPin, LOW);
@@ -59,6 +52,32 @@ void turnOnAllButtons() {
   }
 }
 
+TaskHandle_t blinkAllButtonsTaskHandle = NULL;
+
+#define BLINK_X_TIMES 5
+void blinkAllButtonsTask(void *params) {
+  for(int i = 0; i < BLINK_X_TIMES; i++) {
+    turnOnAllButtons();
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+    turnOffAllButtons();
+    vTaskDelay(250 / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+  blinkAllButtonsTaskHandle = NULL;
+}
+
+void blinkAllButtons() {
+  xTaskCreate(blinkAllButtonsTask, "blinkAllButtons", 2048, NULL, 5, &blinkAllButtonsTaskHandle);
+}
+
+void stopBlinkAllButtons() {
+  if (blinkAllButtonsTaskHandle) {
+    vTaskDelete(blinkAllButtonsTaskHandle);
+    blinkAllButtonsTaskHandle = NULL;
+  }
+}
+
+
 void stopGame() {
   gameState = FINISHED;
   turnOffAllButtons();
@@ -76,10 +95,8 @@ int countOnButtons() {
 }
 
 bool goToIdle(void *) {
-  Serial.println("Flashing buttons");
-
   gameState = IDLE;
-  afterFinishedLightFlashTimer.cancel();
+  stopBlinkAllButtons();
   turnOffAllButtons();
   broadcastGameState();
 
@@ -89,7 +106,6 @@ bool goToIdle(void *) {
 bool flashAllButtons(void *) {
   bool wasOn = buttons[0].ledTurnedOnAt != 0;
 
-  Serial.println("Flashing buttons");
   if (wasOn) {
     turnOffAllButtons();
   } else {
@@ -131,8 +147,7 @@ void onButtonPressed(Button2& btn) {
 
   if (gameButtonsPressed >= GAME_BUTTONS_DURATION_PRESSED) {
     gameState = FINISHED;
-    beforeIdleTimer.in(5000, goToIdle);
-    afterFinishedLightFlashTimer.every(250, flashAllButtons);
+    blinkAllButtons();
   } else if (
     onButtonsCount < GAME_BUTTONS_ON_IN_PARALLEL &&
     gameButtonsPressed + onButtonsCount < GAME_BUTTONS_DURATION_PRESSED
@@ -161,14 +176,34 @@ void setupGame() {
     buttons[i].ledTurnedOnAt = 0;
   }
 
-  beforeIdleTimer.in(5000, goToIdle);
-  afterFinishedLightFlashTimer.every(250, flashAllButtons);
+  blinkAllButtons();
+
+  xTaskCreatePinnedToCore(
+    loopGame,
+    "loop game",
+    2048,
+    NULL,
+    1,
+    NULL,
+    1
+  );
 }
 
-void loopGame() {
-  afterFinishedLightFlashTimer.tick();
-  beforeIdleTimer.tick();
-  for (int i = 0; i < BUTTONS_COUNT; i++) {
-    buttons[i].button.loop();
+uint32_t lastLoopMillis2 = millis();
+uint32_t lastLoopPrinted2 = 0;
+
+void loopGame(void *params) {
+  for (;;) {
+    if (lastLoopPrinted2 > 1000) {
+      debugA("1000 loops took %d ms", millis() - lastLoopMillis2);
+      lastLoopMillis2 = millis();
+      lastLoopPrinted2 = 0;
+    }
+    lastLoopPrinted2++;
+
+    for (int i = 0; i < BUTTONS_COUNT; i++) {
+      buttons[i].button.loop();
+    }
+    vTaskDelay(0);
   }
 }

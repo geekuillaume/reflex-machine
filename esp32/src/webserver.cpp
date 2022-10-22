@@ -4,8 +4,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 
-#include "./game.hpp"
-#include "./preferences.hpp"
+#include "./main.hpp"
 
 // Replace with your network credentials
 const char* ssid = "ThisIsNotTheWifiYoureLookingFor";
@@ -24,31 +23,45 @@ extern const uint8_t css_end[] asm("_binary_src_webui_assets_index_css_gz_end");
 extern const uint8_t js_start[] asm("_binary_src_webui_assets_index_js_gz_start");
 extern const uint8_t js_end[] asm("_binary_src_webui_assets_index_js_gz_end");
 
+// Use to debounce game stats broadcast + run it on separate core
+bool shouldBroadcastGameState = false;
+
 void broadcastGameState() {
+  shouldBroadcastGameState = true;
+}
+
+void sendGameStateBroadcastLoop(void *pvParameters) {
   StaticJsonDocument<256> wsMessage;
   String serializedWsMesssage;
+  unsigned long startedMsAgo;
 
-  unsigned long startedMsAgo = gameLastActionTime - gameStartedAt;
+  for(;;){
+    if (shouldBroadcastGameState) {
+      serializedWsMesssage = "";
+      wsMessage.clear();
+      startedMsAgo = gameLastActionTime - gameStartedAt;
+      wsMessage["type"] = "gameState";
+      wsMessage["state"] = gameState == IDLE ? "IDLE"
+        : gameState == WAITING_FOR_FIRST_PRESS ? "WAITING_FOR_FIRST_PRESS"
+        : gameState == RUNNING ? "RUNNING"
+        : gameState == FINISHED ? "FINISHED"
+        : "UNKNOWN";
+      wsMessage["missed"] = gameButtonsMissed;
+      wsMessage["pressed"] = gameButtonsPressed;
+      wsMessage["startedMsAgo"] = startedMsAgo;
+      serializeJson(wsMessage, serializedWsMesssage);
+      ws.textAll(serializedWsMesssage);
+      shouldBroadcastGameState = false;
+      debugA("Sent game broadcast");
+    }
 
-  wsMessage["type"] = "gameState";
-  wsMessage["state"] = gameState == IDLE ? "IDLE"
-    : gameState == WAITING_FOR_FIRST_PRESS ? "WAITING_FOR_FIRST_PRESS"
-    : gameState == RUNNING ? "RUNNING"
-    : gameState == FINISHED ? "FINISHED"
-    : "UNKNOWN";
-  wsMessage["missed"] = gameButtonsMissed;
-  wsMessage["pressed"] = gameButtonsPressed;
-  wsMessage["startedMsAgo"] = startedMsAgo;
-
-  serializeJson(wsMessage, serializedWsMesssage);
-  Serial.println(serializedWsMesssage);
-  ws.textAll(serializedWsMesssage);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   StaticJsonDocument<256> parsedMessage;
-
 
   if (info->final &&
     info->index == 0 &&
@@ -99,7 +112,12 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
   }
 }
 
-void initWebSocket() {
+void loopWebserver(void *pvParameters) {
+  for (;;) {
+    ws.cleanupClients();
+    ArduinoOTA.handle();
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+  }
 }
 
 void setupWebserver() {
@@ -107,7 +125,7 @@ void setupWebserver() {
   // Connect to Wi-Fi
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi..");
+    debugA("Connecting to WiFi..");
   }
 
   ArduinoOTA
@@ -119,16 +137,16 @@ void setupWebserver() {
         type = "filesystem";
 
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
+      debugA("Start updating %s\n", type);
     })
     .onEnd([]() {
-      Serial.println("\nEnd");
+      debugA("\nEnd");
     })
     .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+     debugA("Progress: %u%%\r", (progress / (total / 100)));
     })
     .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
+      debugA("Error[%u]: ", error);
       if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
       else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
       else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
@@ -138,8 +156,8 @@ void setupWebserver() {
 
   ArduinoOTA.begin();
 
-    // Print ESP Local IP Address
-  Serial.println(WiFi.localIP());
+  // Print ESP Local IP Address
+  printlnA(WiFi.localIP());
 
   ws.onEvent(onEvent);
   server.addHandler(&ws);
@@ -166,9 +184,24 @@ void setupWebserver() {
 
   // Start server
   server.begin();
-}
 
-void loopWebserver() {
-  ws.cleanupClients();
-  ArduinoOTA.handle();
+  xTaskCreatePinnedToCore(
+    sendGameStateBroadcastLoop,   /* Task function. */
+    "sendGameStateBroadcast",     /* name of task. */
+    10000,       /* Stack size of task */
+    NULL,        /* parameter of the task */
+    1,           /* priority of the task */
+    NULL,      /* Task handle to keep track of created task */
+    0 // Core 0
+  );
+
+  xTaskCreatePinnedToCore(
+    loopWebserver,
+    "loopWebserver",
+    10000,
+    NULL,
+    2,
+    NULL,
+    0
+  );
 }
