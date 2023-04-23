@@ -1,7 +1,7 @@
 #include "./main.hpp"
 
 uint GAME_BUTTONS_ON_IN_PARALLEL = 3;
-uint GAME_BUTTONS_DURATION_PRESSED = 15; // Game stop after 100 presses
+uint GAME_BUTTONS_DURATION_PRESSED = 100; // Game stop after 100 presses
 
 Preferences preferences;
 

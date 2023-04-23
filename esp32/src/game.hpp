@@ -16,5 +16,4 @@ extern unsigned long gameLastActionTime;
 
 void stopGame();
 void setupGame();
-void loopGame(void *params);
 
